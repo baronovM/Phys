@@ -19,6 +19,8 @@ int main()
 	text2.setPosition({ 150, 50 });
 
 	Vector2d firstClick, secondClick;
+	//double firstClickTime, secondClickTime;
+	sf::Clock clickClock;
 
 	sf::Clock clock;
 
@@ -53,15 +55,19 @@ int main()
 				}
 			}
 			else if (event.type == sf::Event::MouseButtonPressed) {
-				//if (event.mouseButton.button == sf::Mouse::Left) {
 				firstClick.x = event.mouseButton.x;
 				firstClick.y = event.mouseButton.y;
-				//}
+				clickClock.restart();
 			}
 			else if (event.type == sf::Event::MouseButtonReleased) {
-				secondClick.x = event.mouseButton.x;
-				secondClick.y = event.mouseButton.y;
-				new Solid(firstClick, 1.0, 10., (secondClick - firstClick));
+				double clickdur = clickClock.getElapsedTime().asSeconds();;
+				if (event.mouseButton.button == sf::Mouse::Left) {
+					secondClick.x = event.mouseButton.x;
+					secondClick.y = event.mouseButton.y;
+				} else {
+					secondClick = firstClick;
+				}
+				new Solid(firstClick, 1. + clickdur, 8. * sqrt(1. + clickdur), (secondClick - firstClick));
 				text2.setString(std::to_string(Solid::solids.size()));
 			}
 		}
