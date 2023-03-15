@@ -8,6 +8,6 @@ public:
 	virtual void draw(sf::RenderTarget& target) const override;
 	void calcCollisions();
 private:
-	float m_radius;
+	float radius;
 };
 

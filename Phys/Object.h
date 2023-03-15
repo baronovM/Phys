@@ -4,7 +4,7 @@
 #include <SFML/Graphics.hpp>
 #include <iostream>
 
-typedef sf::Vector2<double> Vector2d;
+using Vector2d = sf::Vector2<double>;
 using sf::Vector2f;
 
 class Object
@@ -16,11 +16,11 @@ public:
 	void acceptSpeed();
 	void move(double elapsedTime);
 protected:
-	sf::Shape* m_shape;
-	Vector2d m_coordinates;
-	Vector2d m_speed;
-	Vector2d m_newSpeed;
-	double m_mass, m_invMass;
+	sf::Shape* shape;
+	Vector2d coordinates;
+	Vector2d speed;
+	Vector2d newSpeed;
+	double mass, invMass;
 };
 
 
