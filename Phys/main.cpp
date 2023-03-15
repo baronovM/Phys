@@ -67,7 +67,7 @@ int main()
 				} else {
 					secondClick = firstClick;
 				}
-				new Solid(firstClick, 1. + clickdur, 8. * sqrt(1. + clickdur), (secondClick - firstClick));
+				new Solid(firstClick, 1. + clickdur * clickdur, 8. * pow(1. + clickdur * clickdur, 1./3.), (secondClick - firstClick));
 				text2.setString(std::to_string(Solid::solids.size()));
 			}
 		}

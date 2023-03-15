@@ -3,7 +3,6 @@
 Object::Object(Vector2d coordinates, double mass, Vector2d speed, sf::Shape* shapePtr)
 	: shape(shapePtr), coordinates(coordinates), speed(speed), mass(mass), invMass(1. / mass)
 {
-	shape->setPosition(Vector2f(coordinates));
 	objects.push_back(this);
 }
 

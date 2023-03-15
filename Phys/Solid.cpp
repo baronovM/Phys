@@ -3,6 +3,7 @@
 Solid::Solid(Vector2d coordinates, double mass, double radius, Vector2d speed) :
 	Object(coordinates, mass, speed, new sf::CircleShape(radius)), radius(radius)
 {
+	shape->setPosition(Vector2f(coordinates - Vector2d(radius, radius)));
 	solids.push_back(this);
 }
 
