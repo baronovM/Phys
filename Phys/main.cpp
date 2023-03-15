@@ -61,7 +61,7 @@ int main()
 			else if (event.type == sf::Event::MouseButtonReleased) {
 				secondClick.x = event.mouseButton.x;
 				secondClick.y = event.mouseButton.y;
-				new Solid(firstClick, 1.0, 10.f, (secondClick - firstClick));
+				new Solid(firstClick, 1.0, 10., (secondClick - firstClick));
 				text2.setString(std::to_string(Solid::solids.size()));
 			}
 		}
