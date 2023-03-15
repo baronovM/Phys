@@ -16,7 +16,7 @@ public:
 	void acceptSpeed();
 	void move(double elapsedTime);
 protected:
-	sf::Shape* shape;
+	std::unique_ptr<sf::Shape> shape;
 	Vector2d coordinates;
 	Vector2d speed;
 	Vector2d newSpeed;

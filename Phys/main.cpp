@@ -9,7 +9,8 @@ int main()
 	sf::RenderWindow window(sf::VideoMode::getFullscreenModes()[0], sf::String("Физика", std::locale("RUS")), sf::Style::Default, settings);
 
 	settings.antialiasingLevel = 8;
-	window.setFramerateLimit(120);
+	window.setFramerateLimit(100);
+	const int calcCnt = 3;
 
 	sf::Font font;
 	font.loadFromFile("C:\\Windows\\Fonts\\arial.ttf");
@@ -66,7 +67,7 @@ int main()
 		}
 		window.clear();
 		double elapsedTime = clock.getElapsedTime().asSeconds();
-		for (int k = 0; k < 2; ++k) {
+		for (int k = 0; k < calcCnt; ++k) {
 			for (auto i : Solid::solids)
 				i->calcCollisions();
 			for (auto i : Solid::solids)
