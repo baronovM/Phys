@@ -19,13 +19,11 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="main.cpp" />
-    <ClCompile Include="Object.cpp" />
-    <ClCompile Include="Solid.cpp" />
+    <ClCompile Include="Charged Particle\charged.cpp" />
+    <ClCompile Include="Charged Particle\ChargedParticle.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="Object.h" />
-    <ClInclude Include="Solid.h" />
+    <ClInclude Include="Charged Particle\ChargedParticle.h" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <VCProjectVersion>16.0</VCProjectVersion>
