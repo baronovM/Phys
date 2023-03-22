@@ -15,15 +15,15 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="Charged Particle\charged.cpp">
+    <ClCompile Include="Soft\main.cpp">
       <Filter>Исходные файлы</Filter>
     </ClCompile>
-    <ClCompile Include="Charged Particle\ChargedParticle.cpp">
+    <ClCompile Include="Soft\Object.cpp">
       <Filter>Исходные файлы</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="Charged Particle\ChargedParticle.h">
+    <ClInclude Include="Soft\Object.h">
       <Filter>Файлы заголовков</Filter>
     </ClInclude>
   </ItemGroup>
