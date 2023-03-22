@@ -6,7 +6,9 @@ std::vector<Solid*> Solid::solids;
 int main()
 {
 	sf::ContextSettings settings;
-	sf::RenderWindow window(sf::VideoMode::getFullscreenModes()[0], sf::String("Физика", std::locale("RUS")), sf::Style::Default, settings);
+	sf::RenderWindow window(sf::VideoMode(1900, 1000)/*::getFullscreenModes()[0]*/, sf::String("Физика", std::locale("RUS")), sf::Style::Default, settings);
+
+	//window.setSize(window.getSize() - sf::Vector2u(15, 60));
 
 	settings.antialiasingLevel = 8;
 	window.setFramerateLimit(100);
@@ -17,6 +19,10 @@ int main()
 	sf::Text text("", font), text2("", font);
 	text.setPosition({ 150, 25 });
 	text2.setPosition({ 150, 50 });
+
+	sf::Texture textureCross;
+	if (!textureCross.loadFromFile("cross.png"))
+		std::cerr << "ERROR: texture load failed\n";
 
 	Vector2d firstClick, secondClick;
 	//double firstClickTime, secondClickTime;
@@ -60,14 +66,14 @@ int main()
 				clickClock.restart();
 			}
 			else if (event.type == sf::Event::MouseButtonReleased) {
-				double clickdur = clickClock.getElapsedTime().asSeconds();;
+				double clickdur = clickClock.getElapsedTime().asSeconds() * timeSpeed;
 				if (event.mouseButton.button == sf::Mouse::Left) {
 					secondClick.x = event.mouseButton.x;
 					secondClick.y = event.mouseButton.y;
 				} else {
 					secondClick = firstClick;
 				}
-				new Solid(firstClick, 1. + clickdur * clickdur, 8. * pow(1. + clickdur * clickdur, 1./3.), (secondClick - firstClick));
+				new Solid(firstClick, 1. + clickdur * clickdur, 8. * pow(1. + clickdur * clickdur, 1./3.), textureCross, (secondClick - firstClick));
 				text2.setString(std::to_string(Solid::solids.size()));
 			}
 		}
@@ -79,8 +85,8 @@ int main()
 			for (auto i : Solid::solids)
 				i->acceptSpeed();
 		}
-		for (auto i : Object::objects) {
-			i->move(elapsedTime * timeSpeed);
+		for (auto i : Solid::solids) {
+			i->move(elapsedTime * timeSpeed, window.getSize());
 			i->draw(window);
 		}
 		window.draw(text);

@@ -1,15 +1,19 @@
 #include "Solid.h"
 
-Solid::Solid(Vector2d coordinates, double mass, double radius, Vector2d speed) :
-	Object(coordinates, mass, speed, new sf::CircleShape(radius)), radius(radius)
+Solid::Solid(Vector2d coordinates, double mass, double radius, const sf::Texture& texture, Vector2d speed) :
+	Object(coordinates, mass, speed, new sf::CircleShape(radius), new sf::Sprite(texture)), radius(radius)
 {
-	shape->setPosition(Vector2f(coordinates - Vector2d(radius, radius)));
+	shape->setOrigin(radius, radius);
+	shape->setPosition(Vector2f(coordinates));
+	sprite->setOrigin(sprite->getTextureRect().width / 2, sprite->getTextureRect().height / 2);
+	sprite->setPosition(Vector2f(coordinates));
 	solids.push_back(this);
 }
 
 void Solid::draw(sf::RenderTarget& target) const
 {
 	target.draw(*shape);
+	target.draw(*sprite);
 }
 
 void Solid::calcCollisions()
@@ -38,3 +42,23 @@ void Solid::calcCollisions()
 		}
 	}
 }
+
+void Solid::move(double elapsedTime, const sf::Vector2u& size)
+{
+	if (borders) {
+		if (coordinates.x < radius && newSpeed.x < 0) {
+			newSpeed.x = -newSpeed.x;
+		}
+		if (coordinates.x > size.x - radius && newSpeed.x > 0) {
+			newSpeed.x = -newSpeed.x;
+		}
+		if (coordinates.y < radius && newSpeed.y < 0) {
+			newSpeed.y = -newSpeed.y;
+		}
+		if (coordinates.y > size.y - radius && newSpeed.y > 0) {
+			newSpeed.y = -newSpeed.y;
+		}
+	}
+	Object::move(elapsedTime);
+}
+
