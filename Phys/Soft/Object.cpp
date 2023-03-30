@@ -142,8 +142,11 @@ void Object::solveCol()
 				
 				Vector2d shift = nrpt - mpt.pos;
 				mpt.pos += shift * r2;
-				p2.pos += -shift * (1. - r2);
-				p1.pos += -shift * (1. - r2);
+
+				Vector2d s0 = -shift * (1. - r2);
+				double antidiv = 1. / (sqr(1. - ratio) + sqr(ratio));
+				p1.pos += s0 * (1. - ratio) * antidiv;
+				p2.pos += s0 * ratio * antidiv;
 			}
 		}
 	}
