@@ -44,6 +44,28 @@ void Object::moveEul(double deltaTime)
 }
 
 
+
+double len2(const Vector2d& vec) {
+	return vec.x * vec.x + vec.y * vec.y;
+}
+
+double dist_to_line2(Vector2d point, Vector2d n, double c) {
+	return sqr(n.x * point.x + n.y * point.y + c) / len2(n);
+}
+
+double dist_to_lineseg2(Vector2d point, Vector2d a, Vector2d b) {
+	if (len2(point - b) + len2(b - a) >= len2(point - a)
+		&& len2(point - a) + len2(b - a) >= len2(point - b)) {
+
+		Vector2d norm((b - a).y, -(b - a).x);
+		double c = -(norm.x * a.x + norm.y * a.y);
+		return dist_to_line2(point, norm, c);
+	}
+	else {
+		return std::min(len2(point - a), len2(point - b));
+	}
+}
+
 bool dotinpol(const Vector2d& dot, const std::vector<MPoint>& polyg, sf::RenderTarget* rendtg) {
 	// left hor
 	int cnt = 0;
@@ -58,7 +80,7 @@ bool dotinpol(const Vector2d& dot, const std::vector<MPoint>& polyg, sf::RenderT
 				++cnt;
 				
 				/*sf::CircleShape cp(5.f);
-				cp.setFillColor(sf::Color::Red);
+				cp.setFillColor(sf::Color::Magenta);
 				cp.setOrigin(5.f, 5.f);
 				cp.setPosition(interx, dot.y);
 				rendtg->draw(cp);*/
@@ -69,21 +91,7 @@ bool dotinpol(const Vector2d& dot, const std::vector<MPoint>& polyg, sf::RenderT
 	return cnt & 1;
 }
 
-double len2(const Vector2d& vec) {
-	return vec.x * vec.x + vec.y * vec.y;
-}
 
-double dist_to_lineseg2(Vector2d point, Vector2d a, Vector2d b) {
-	if (len2(point - b) + len2(b - a) >= len2(point - a)
-		&& len2(point - a) + len2(b - a) >= len2(point - b)) {
-
-		Vector2d norm((b - a).y, -(b - a).x);
-		double c = -(norm.x * a.x + norm.y * a.y);
-		return sqr(norm.x * point.x + norm.y * point.y + c) / len2(norm);
-	} else {
-		return std::min(len2(point - a), len2(point - b));
-	}
-}
 
 void Object::solveCol()
 {
@@ -91,14 +99,14 @@ void Object::solveCol()
 		if (other == this)
 			continue;
 		for (MPoint& mpt : points) {
-			const auto& otp = other->points;
+			auto& otp = other->points;
 			if (dotinpol(mpt.pos, otp, rendtarg)) {
 
-				sf::CircleShape cp(4.f);
+				/*sf::CircleShape cp(4.f);
 				cp.setFillColor(sf::Color::Red);
 				cp.setOrigin(4.f, 4.f);
 				cp.setPosition(Vector2f(mpt.pos));
-				rendtarg->draw(cp);
+				rendtarg->draw(cp);*/
 
 				double mindist = 1e20, dist;
 				int nearest = 0;
@@ -111,13 +119,31 @@ void Object::solveCol()
 				}
 
 				Vector2d a(otp[nearest].pos), b(otp[(nearest + 1) % otp.size()].pos);
-				sf::RectangleShape nrline(Vector2f(sqrt(len2(b - a)), 3.));
+
+				/*sf::RectangleShape nrline(Vector2f(sqrt(len2(b - a)), 3.));
 				nrline.setFillColor(sf::Color::Cyan);
 				nrline.setPosition(Vector2f(a));
 				double PI = acos(-1.);
 				double angle = atan2((b - a).y, (b - a).x) * 180. / PI;
 				nrline.rotate(angle);
-				rendtarg->draw(nrline);
+				rendtarg->draw(nrline);*/
+
+				double c = -((b - a).x * mpt.pos.x + (b - a).y * mpt.pos.y);
+				double ratio = sqrt(dist_to_line2(a, b - a, c) / len2(b - a));
+
+				Vector2d nrpt = a + (b - a) * ratio;
+
+				/*cp.setFillColor(sf::Color::Yellow);
+				cp.setPosition(Vector2f(nrpt));
+				rendtarg->draw(cp);*/
+
+				MPoint& p1 = otp[nearest], & p2 = otp[(nearest + 1) % otp.size()];
+				double r2 = mpt.mass / (mpt.mass + p1.mass + p2.mass);
+				
+				Vector2d shift = nrpt - mpt.pos;
+				mpt.pos += shift * r2;
+				p2.pos += -shift * (1. - r2);
+				p1.pos += -shift * (1. - r2);
 			}
 		}
 	}
