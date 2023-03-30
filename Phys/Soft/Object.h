@@ -10,8 +10,9 @@ using sf::Vector2f;
 
 struct MPoint {
 	Vector2d pos, vel, force;
-	double mass;
+	double mass, inv_mass;
 	MPoint(double mass, Vector2d position);
+	void moveEul(double deltaTime);
 };
 
 
@@ -20,11 +21,14 @@ class Object
 public:
 	std::vector<MPoint> points;
 	double k;
-	Object(double mass, double k, const std::vector<Vector2d>& points_coords);
-	void draw(sf::RenderTarget& target);
-
+	Object(double mass, double k, const std::vector<Vector2d>& points_coords, sf::RenderTarget* rendertarget);
+	void draw(sf::RenderTarget& target) const;
+	void moveEul(double deltaTime);
 
 	static std::vector<Object*> objects;
+	void solveCol();
+
+	sf::RenderTarget* rendtarg;
 	/*Object(Vector2d coordinates, double mass, Vector2d speed, sf::Shape* shapePtr, sf::Sprite* spritePtr);
 	virtual void draw(sf::RenderTarget& target) const = 0;
 	void acceptSpeed();
