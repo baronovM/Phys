@@ -7,7 +7,7 @@ int main()
 	settings.antialiasingLevel = 8;
 	sf::RenderWindow window(sf::VideoMode::getFullscreenModes()[0], sf::String("Физика", std::locale("RUS")), sf::Style::Default, settings);
 
-	window.setFramerateLimit(100);
+	window.setFramerateLimit(150);
 
 	sf::Font font;
 	font.loadFromFile("C:\\Windows\\Fonts\\arial.ttf");
@@ -17,9 +17,11 @@ int main()
 	sf::Clock clock;
 
 	double timeSpeed = 1.0;
+	bool flag_static = false;
 	text.setString(std::to_string(timeSpeed));
 
 	std::vector<Vector2d> clicks;
+	
 
 	while (window.isOpen())
 	{
@@ -46,11 +48,19 @@ int main()
 						delete i;
 					Object::objects.clear();
 				}
+				else if (event.key.code == sf::Keyboard::S) {
+					flag_static = true;
+				}
+			}
+			else if (event.type == sf::Event::KeyReleased) {
+				if (event.key.code == sf::Keyboard::S) {
+					flag_static = false;
+				}
 			}
 			else if (event.type == sf::Event::MouseButtonPressed) {
 				clicks.emplace_back(event.mouseButton.x, event.mouseButton.y);
 				if (event.mouseButton.button == sf::Mouse::Right) {
-					new Object(1., 1., clicks, &window);
+					new Object(flag_static ? INF_MASS : 1., 50., clicks, &window);
 					clicks.clear();
 				}
 			}
@@ -61,6 +71,7 @@ int main()
 		double elapsedTime = clock.getElapsedTime().asSeconds();
 		for (auto i : Object::objects) {
 			i->solveCol();
+			i->runSprings();
 		}
 		for (auto i : Object::objects) {
 			i->moveEul(elapsedTime * timeSpeed);

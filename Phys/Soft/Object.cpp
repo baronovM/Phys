@@ -2,8 +2,14 @@
 
 std::vector<Object*> Object::objects;
 
+
+double len2(const Vector2d& vec) {
+	return vec.x * vec.x + vec.y * vec.y;
+}
+
+
 MPoint::MPoint(double mass, Vector2d position)
-	: mass(mass), inv_mass(1. / mass), pos(position), vel(0., 0.), force(0., 0.) {}
+	: mass(mass), inv_mass(mass == INF_MASS ? 0. : 1. / mass), pos(position), vel(0., 0.), force(0., 0.) {}
 
 void MPoint::moveEul(double deltaTime)
 {
@@ -14,13 +20,33 @@ void MPoint::moveEul(double deltaTime)
 }
 
 
+Spring::Spring(MPoint* a, MPoint* b, double k) :
+	a(a), b(b), k(k), l0(sqrt(len2(b->pos - a->pos))) {}
+
+void Spring::run()
+{
+	Vector2d p1 = a->pos, p2 = b->pos;
+	double l = sqrt(len2(p2 - p1));
+	double f = (l - l0) * k;
+	Vector2d force = (p2 - p1) / sqrt(len2(p2 - p1)) * f;
+	a->force += force;
+	b->force -= force;
+}
+
+
 Object::Object(double mass, double k, const std::vector<Vector2d>& points_coords, sf::RenderTarget* rendertarget)
 	: k(k), rendtarg(rendertarget)
 {
 	int count = int(points_coords.size());
 	points.reserve(count);
+	springs.reserve(count);
+	double m1 = mass / count;
 	for (int i = 0; i < count; ++i) {
-		points.push_back(MPoint(mass / count, points_coords[i]));
+		points.emplace_back(m1, points_coords[i]);
+	}
+	for (int i = 0; i < count; ++i) {
+		for (int j = i + 1; j < count; ++j)
+			springs.emplace_back(&points[i], &points[j], k);
 	}
 
 	objects.push_back(this);
@@ -43,11 +69,6 @@ void Object::moveEul(double deltaTime)
 	}
 }
 
-
-
-double len2(const Vector2d& vec) {
-	return vec.x * vec.x + vec.y * vec.y;
-}
 
 double dist_to_line2(Vector2d point, Vector2d n, double c) {
 	return sqr(n.x * point.x + n.y * point.y + c) / len2(n);
@@ -138,7 +159,17 @@ void Object::solveCol()
 				rendtarg->draw(cp);*/
 
 				MPoint& p1 = otp[nearest], & p2 = otp[(nearest + 1) % otp.size()];
-				double r2 = mpt.mass / (mpt.mass + p1.mass + p2.mass);
+
+				if (mpt.inv_mass == 0. && (p1.inv_mass == 0. || p2.inv_mass == 0.))
+					continue;
+
+				double r2;
+				if (mpt.inv_mass == 0.)
+					r2 = 0.;
+				else if (p1.inv_mass == 0. || p2.inv_mass == 0.)
+					r2 = 1.;
+				else
+					r2 = (p1.mass + p2.mass) / (mpt.mass + p1.mass + p2.mass);
 				
 				Vector2d shift = nrpt - mpt.pos;
 				mpt.pos += shift * r2;
@@ -149,5 +180,12 @@ void Object::solveCol()
 				p2.pos += s0 * ratio * antidiv;
 			}
 		}
+	}
+}
+
+void Object::runSprings()
+{
+	for (int i = 0; i < springs.size(); ++i) {
+		springs[i].run();
 	}
 }

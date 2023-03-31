@@ -7,6 +7,7 @@
 using Vector2d = sf::Vector2<double>;
 using sf::Vector2f;
 
+constexpr double INF_MASS = 0;
 
 struct MPoint {
 	Vector2d pos, vel, force;
@@ -15,11 +16,19 @@ struct MPoint {
 	void moveEul(double deltaTime);
 };
 
+struct Spring {
+	MPoint* a, * b;
+	double k, l0;
+	Spring(MPoint* a, MPoint* b, double k);
+	void run();
+};
+
 
 class Object
 {
 public:
 	std::vector<MPoint> points;
+	std::vector<Spring> springs;
 	double k;
 	Object(double mass, double k, const std::vector<Vector2d>& points_coords, sf::RenderTarget* rendertarget);
 	void draw(sf::RenderTarget& target) const;
@@ -27,19 +36,9 @@ public:
 
 	static std::vector<Object*> objects;
 	void solveCol();
+	void runSprings();
 
 	sf::RenderTarget* rendtarg;
-	/*Object(Vector2d coordinates, double mass, Vector2d speed, sf::Shape* shapePtr, sf::Sprite* spritePtr);
-	virtual void draw(sf::RenderTarget& target) const = 0;
-	void acceptSpeed();
-	void move(double elapsedTime);
-protected:
-	std::unique_ptr<sf::Shape> shape;
-	std::unique_ptr<sf::Sprite> sprite;
-	Vector2d coordinates;
-	Vector2d speed;
-	Vector2d newSpeed;
-	double mass, invMass;*/
 };
 
 
