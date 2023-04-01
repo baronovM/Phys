@@ -16,7 +16,7 @@ void MPoint::moveEul(double deltaTime)
 	vel += force * inv_mass * deltaTime;
 	pos += vel * deltaTime;
 	force.x = 0;
-	force.y = 0;
+	force.y = 100. * mass;
 }
 
 
@@ -206,9 +206,11 @@ void Object::solveCol()
 				MPoint edge(INF_MASS, (p1.pos + p2.pos) / 2.);
 				edge.vel = p1.vel;						//  !!!!!!
 				if (p1.inv_mass != 0. && p2.inv_mass != 0.) {
-					edge.mass = p1.mass + p2.mass;
-					edge.pos = (p1.pos * p1.mass + p2.pos * p2.mass) / (p1.mass + p2.mass);
-					edge.vel = (p1.vel * p1.mass + p2.vel * p2.mass) / (p1.mass + p2.mass);
+					double efm1 = p1.mass * ratio, efm2 = p2.mass * (1. - ratio),
+						invsm = 1. / (efm1 + efm2);
+					edge.mass = efm1 + efm2;
+					edge.pos = (p1.pos * efm1 + p2.pos * efm2) * invsm;
+					edge.vel = (p1.vel * efm1 + p2.vel * efm2) * invsm;
 				}
 				std::pair<Vector2d, Vector2d>* dvptr = elrigid_centr_impact(mpt, edge, shift);
 
