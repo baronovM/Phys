@@ -112,7 +112,31 @@ bool dotinpol(const Vector2d& dot, const std::vector<MPoint>& polyg, sf::RenderT
 	return cnt & 1;
 }
 
+std::pair<Vector2d, Vector2d>* elrigid_centr_impact(const MPoint& a, const MPoint& b, Vector2d n) {
+	auto deltaVptr = new std::pair<Vector2d, Vector2d>;
+	n /= sqrt(len2(n));
+	double v1 = dotProduct(a.vel, n);
+	double v2 = dotProduct(b.vel, n);
 
+	double dv1, dv2;
+
+	if (a.inv_mass == 0.) {
+		dv1 = 0.;
+		dv2 = 2. * (v1 - v2);
+	}
+	else if (b.inv_mass == 0.) {
+		dv1 = 2. * (v2 - v1);
+		dv2 = 0.;
+	}
+	else {
+		double sminv = 1. / (a.mass + b.mass);
+		dv1 = 2. * b.mass * (v2 - v1) * sminv;
+		dv2 = 2. * a.mass * (v1 - v2) * sminv;
+	}
+	deltaVptr->first = n * dv1;
+	deltaVptr->second = n * dv2;
+	return deltaVptr;
+}
 
 void Object::solveCol()
 {
@@ -150,7 +174,7 @@ void Object::solveCol()
 				rendtarg->draw(nrline);*/
 
 				double c = -((b - a).x * mpt.pos.x + (b - a).y * mpt.pos.y);
-				double ratio = sqrt(dist_to_line2(a, b - a, c) / len2(b - a));
+				double ratio = sqrt(dist_to_line2(a, b - a, c) / len2(b - a));	//   !!!!!
 
 				Vector2d nrpt = a + (b - a) * ratio;
 
@@ -176,8 +200,22 @@ void Object::solveCol()
 
 				Vector2d s0 = -shift * (1. - r2);
 				double antidiv = 1. / (sqr(1. - ratio) + sqr(ratio));
-				p1.pos += s0 * (1. - ratio) * antidiv;
-				p2.pos += s0 * ratio * antidiv;
+				p1.pos += s0 * (1. - ratio) * antidiv;	//				!!!!!!
+				p2.pos += s0 * ratio * antidiv;			//				!!!!!!
+
+				MPoint edge(INF_MASS, (p1.pos + p2.pos) / 2.);
+				edge.vel = p1.vel;						//  !!!!!!
+				if (p1.inv_mass != 0. && p2.inv_mass != 0.) {
+					edge.mass = p1.mass + p2.mass;
+					edge.pos = (p1.pos * p1.mass + p2.pos * p2.mass) / (p1.mass + p2.mass);
+					edge.vel = (p1.vel * p1.mass + p2.vel * p2.mass) / (p1.mass + p2.mass);
+				}
+				std::pair<Vector2d, Vector2d>* dvptr = elrigid_centr_impact(mpt, edge, shift);
+
+				mpt.vel += dvptr->first;
+				p1.vel += dvptr->second;				//			!!!!!!!!!
+				p2.vel += dvptr->second;				//			!!!!!!!!!
+				delete dvptr;
 			}
 		}
 	}

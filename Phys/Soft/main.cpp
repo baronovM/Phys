@@ -60,7 +60,7 @@ int main()
 			else if (event.type == sf::Event::MouseButtonPressed) {
 				clicks.emplace_back(event.mouseButton.x, event.mouseButton.y);
 				if (event.mouseButton.button == sf::Mouse::Right) {
-					new Object(flag_static ? INF_MASS : 1., 50., clicks, &window);
+					new Object(flag_static ? INF_MASS : 1., 25., clicks, &window);
 					clicks.clear();
 				}
 			}
@@ -71,6 +71,8 @@ int main()
 		double elapsedTime = clock.getElapsedTime().asSeconds();
 		for (auto i : Object::objects) {
 			i->solveCol();
+		}
+		for (auto i : Object::objects) {
 			i->runSprings();
 		}
 		for (auto i : Object::objects) {
