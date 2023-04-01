@@ -16,7 +16,7 @@ void MPoint::moveEul(double deltaTime)
 	vel += force * inv_mass * deltaTime;
 	pos += vel * deltaTime;
 	force.x = 0;
-	force.y = 100. * mass;
+	force.y = 10. * mass;
 }
 
 
@@ -40,13 +40,13 @@ Object::Object(double mass, double k, const std::vector<Vector2d>& points_coords
 	int count = int(points_coords.size());
 	points.reserve(count);
 	springs.reserve(count);
-	double m1 = mass / count;
+	double m1 = mass / count, k1 = 2. * k / (count * count);
 	for (int i = 0; i < count; ++i) {
 		points.emplace_back(m1, points_coords[i]);
 	}
 	for (int i = 0; i < count; ++i) {
 		for (int j = i + 1; j < count; ++j)
-			springs.emplace_back(&points[i], &points[j], k);
+			springs.emplace_back(&points[i], &points[j], k1);
 	}
 
 	objects.push_back(this);

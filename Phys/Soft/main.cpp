@@ -7,7 +7,8 @@ int main()
 	settings.antialiasingLevel = 8;
 	sf::RenderWindow window(sf::VideoMode::getFullscreenModes()[0], sf::String("Физика", std::locale("RUS")), sf::Style::Default, settings);
 
-	window.setFramerateLimit(150);
+	window.setFramerateLimit(70);
+	const int phys_per_frame = 10;
 
 	sf::Font font;
 	font.loadFromFile("C:\\Windows\\Fonts\\arial.ttf");
@@ -60,7 +61,7 @@ int main()
 			else if (event.type == sf::Event::MouseButtonPressed) {
 				clicks.emplace_back(event.mouseButton.x, event.mouseButton.y);
 				if (event.mouseButton.button == sf::Mouse::Right) {
-					new Object(flag_static ? INF_MASS : 1., 25., clicks, &window);
+					new Object(flag_static ? INF_MASS : 1., 500., clicks, &window);
 					clicks.clear();
 				}
 			}
@@ -68,15 +69,19 @@ int main()
 			}
 		}
 		window.clear();
-		double elapsedTime = clock.getElapsedTime().asSeconds();
-		for (auto i : Object::objects) {
-			i->solveCol();
+		for (int i = 0; i < phys_per_frame; ++i) {
+			for (auto i : Object::objects) {
+				i->solveCol();
+			}
+			for (auto i : Object::objects) {
+				i->runSprings();
+			}
+			double elapsedTime = clock.getElapsedTime().asSeconds();
+			for (auto i : Object::objects) {
+				i->moveEul(elapsedTime * timeSpeed);
+			}
 		}
 		for (auto i : Object::objects) {
-			i->runSprings();
-		}
-		for (auto i : Object::objects) {
-			i->moveEul(elapsedTime * timeSpeed);
 			i->draw(window);
 		}
 		window.draw(text);
