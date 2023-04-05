@@ -19,9 +19,10 @@ int main()
 
 	double timeSpeed = 1.0;
 	bool flag_static = false;
+	bool mouse_pressed = false;
 	text.setString(std::to_string(timeSpeed));
 
-	std::vector<Vector2d> clicks;
+	std::vector<Vector2d> points;
 	
 
 	while (window.isOpen())
@@ -58,11 +59,28 @@ int main()
 					flag_static = false;
 				}
 			}
+			/*
 			else if (event.type == sf::Event::MouseButtonPressed) {
-				clicks.emplace_back(event.mouseButton.x, event.mouseButton.y);
+				mouse_pressed = true;
+				points.emplace_back(event.mouseButton.x, event.mouseButton.y);
+			}
+			else if (event.type == sf::Event::MouseButtonReleased) {
+				mouse_pressed = false;
+				new Object(flag_static ? INF_MASS : 1., 5., points, &window);
+				points.clear();
+			}
+			else if (mouse_pressed && event.type == sf::Event::MouseMoved) {
+				Vector2d mouse_move = Vector2d(event.mouseMove.x, event.mouseMove.y);
+				if (points.empty() || len2(mouse_move - points[points.size() - 1]) >= sqr(30.)) {
+					points.emplace_back(mouse_move);
+				}
+			}
+			*/
+			else if (event.type == sf::Event::MouseButtonPressed) {
+				points.emplace_back(event.mouseButton.x, event.mouseButton.y);
 				if (event.mouseButton.button == sf::Mouse::Right) {
-					new Object(flag_static ? INF_MASS : 1., 500., clicks, &window);
-					clicks.clear();
+					new Object(flag_static ? INF_MASS : 1., 150., points, &window);
+					points.clear();
 				}
 			}
 			else if (event.type == sf::Event::MouseButtonReleased) {
@@ -84,6 +102,14 @@ int main()
 		for (auto i : Object::objects) {
 			i->draw(window);
 		}
+
+		sf::VertexArray conv(sf::LineStrip, points.size());
+		for (int i = 0; i < points.size(); ++i) {
+			conv[i].position = Vector2f(points[i]);
+		}
+		window.draw(conv);
+
+
 		window.draw(text);
 		clock.restart();
 		window.display();

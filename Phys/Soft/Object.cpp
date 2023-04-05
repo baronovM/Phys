@@ -3,16 +3,12 @@
 std::vector<Object*> Object::objects;
 
 
-double len2(const Vector2d& vec) {
-	return vec.x * vec.x + vec.y * vec.y;
-}
-
-
 MPoint::MPoint(double mass, Vector2d position)
 	: mass(mass), inv_mass(mass == INF_MASS ? 0. : 1. / mass), pos(position), vel(0., 0.), force(0., 0.) {}
 
 void MPoint::moveEul(double deltaTime)
 {
+	force -= 0.005 * vel + 0.01 * vel * sqrt(len2(vel));
 	vel += force * inv_mass * deltaTime;
 	pos += vel * deltaTime;
 	force.x = 0;
@@ -28,7 +24,7 @@ void Spring::run()
 	Vector2d p1 = a->pos, p2 = b->pos;
 	double l = sqrt(len2(p2 - p1));
 	double f = (l - l0) * k;
-	Vector2d force = (p2 - p1) / sqrt(len2(p2 - p1)) * f;
+	Vector2d force = (p2 - p1) / l * f;
 	a->force += force;
 	b->force -= force;
 }
@@ -215,8 +211,8 @@ void Object::solveCol()
 				std::pair<Vector2d, Vector2d>* dvptr = elrigid_centr_impact(mpt, edge, shift);
 
 				mpt.vel += dvptr->first;
-				p1.vel += dvptr->second;				//			!!!!!!!!!
-				p2.vel += dvptr->second;				//			!!!!!!!!!
+				p1.vel += dvptr->second * 2. * ratio;				//			!!!!!!!!!
+				p2.vel += dvptr->second * 2. * (1. - ratio);		//			!!!!!!!!!
 				delete dvptr;
 			}
 		}

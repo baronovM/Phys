@@ -56,3 +56,7 @@ template<class T>
 T dotProduct(const sf::Vector2<T>& left, const sf::Vector2<T>& right) {
 	return left.x * right.x + left.y * right.y;
 }
+
+inline double len2(const Vector2d& vec) {
+	return vec.x * vec.x + vec.y * vec.y;
+}
