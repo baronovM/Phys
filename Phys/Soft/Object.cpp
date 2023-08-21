@@ -36,14 +36,14 @@ Object::Object(double mass, double k, const std::vector<Vector2d>& points_coords
 	int count = int(points_coords.size());
 	points.reserve(count);
 	springs.reserve(count);
-	double m1 = mass / count, k1 = k / count;//k1 = 2. * k / (count * count);
+	double m1 = mass / count, k1 = 2. * k / (count * count);
 	for (int i = 0; i < count; ++i) {
 		points.emplace_back(m1, points_coords[i]);
 	}
 	startArea = calcArea();
 	for (int i = 0; i < count; ++i) {
-		//for (int j = i + 1; j < count; ++j)
-		springs.emplace_back(&points[i], &points[(i + 1) % count], k1);
+		for (int j = i + 1; j < count; ++j)
+			springs.emplace_back(&points[i], &points[j], k1);
 	}
 
 	objects.push_back(this);
@@ -141,7 +141,7 @@ bool dotinpol(const Vector2d& dot, const std::vector<MPoint>& polyg, sf::RenderT
 	return cnt & 1;
 }
 
-std::pair<Vector2d, Vector2d>* elrigid_centr_impact(const MPoint& a, const MPoint& b, Vector2d n) {
+std::pair<Vector2d, Vector2d>* centr_impact(const MPoint& a, const MPoint& b, Vector2d n) {
 	auto deltaVptr = new std::pair<Vector2d, Vector2d>;
 	n /= sqrt(len2(n));
 	double v1 = dotProduct(a.vel, n);
@@ -151,16 +151,16 @@ std::pair<Vector2d, Vector2d>* elrigid_centr_impact(const MPoint& a, const MPoin
 
 	if (a.inv_mass == 0.) {
 		dv1 = 0.;
-		dv2 = 2. * (v1 - v2);
+		dv2 = (1. + kresb) * (v1 - v2);
 	}
 	else if (b.inv_mass == 0.) {
-		dv1 = 2. * (v2 - v1);
+		dv1 = (1. + kresb) * (v2 - v1);
 		dv2 = 0.;
 	}
 	else {
 		double sminv = 1. / (a.mass + b.mass);
-		dv1 = 2. * b.mass * (v2 - v1) * sminv;
-		dv2 = 2. * a.mass * (v1 - v2) * sminv;
+		dv1 = (1. + kresb) * b.mass * sminv * (v2 - v1);
+		dv2 = (1. + kresb) * a.mass * sminv * (v1 - v2);
 	}
 	deltaVptr->first = n * dv1;
 	deltaVptr->second = n * dv2;
@@ -244,7 +244,7 @@ void Object::solveCol()
 					edge.pos = (p1.pos * efm1 + p2.pos * efm2) * invsm;
 					edge.vel = (p1.vel * efm1 + p2.vel * efm2) * invsm;
 				}
-				std::pair<Vector2d, Vector2d>* dvptr = elrigid_centr_impact(mpt, edge, shift);
+				std::pair<Vector2d, Vector2d>* dvptr = centr_impact(mpt, edge, shift);
 
 				mpt.vel += dvptr->first;
 				p1.vel += dvptr->second * 2. * ratio;				//			!!!!!!!!!

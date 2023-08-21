@@ -7,8 +7,8 @@
 using Vector2d = sf::Vector2<double>;
 using sf::Vector2f;
 
-const double INF_MASS = 0, g = 50, air_resist_lin = 0.0001,
-air_resist_sqr = 0.001, p0 = 200;
+const double INF_MASS = 0, g = 100, air_resist_lin = 0.0001,
+air_resist_sqr = 0.0001, p0 = 100, kresb = 0.25;
 
 struct MPoint {
 	Vector2d pos, vel, force;

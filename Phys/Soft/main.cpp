@@ -7,8 +7,8 @@ int main()
 	settings.antialiasingLevel = 8;
 	sf::RenderWindow window(sf::VideoMode::getFullscreenModes()[0], sf::String("Физика", std::locale("RUS")), sf::Style::Default, settings);
 
-	window.setFramerateLimit(90);
-	const int phys_per_frame = 6;
+	window.setFramerateLimit(60);
+	const int phys_per_frame = 3;
 
 	sf::Font font;
 	font.loadFromFile("C:\\Windows\\Fonts\\arial.ttf");
@@ -70,12 +70,12 @@ int main()
 				if (!mouse_pressed)
 					continue;
 				mouse_pressed = false;
-				new Object(flag_static ? INF_MASS : 1., 25., points, &window);
+				new Object(flag_static ? INF_MASS : 1., 250., points, &window);
 				points.clear();
 			}
 			else if (mouse_pressed && event.type == sf::Event::MouseMoved) {
 				Vector2d mouse_move = Vector2d(event.mouseMove.x, event.mouseMove.y);
-				if (points.empty() || len2(mouse_move - points[points.size() - 1]) >= sqr(20.)) {
+				if (points.empty() || len2(mouse_move - points[points.size() - 1]) >= sqr(flag_static ? 60. : 25.)) {
 					points.emplace_back(mouse_move);
 				}
 			}
