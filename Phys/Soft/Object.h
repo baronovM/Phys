@@ -7,7 +7,8 @@
 using Vector2d = sf::Vector2<double>;
 using sf::Vector2f;
 
-constexpr double INF_MASS = 0;
+const double INF_MASS = 0, g = 10, air_resist_lin = 0.0005,
+air_resist_sqr = 0.005, p0 = 30;
 
 struct MPoint {
 	Vector2d pos, vel, force;
@@ -29,14 +30,15 @@ class Object
 public:
 	std::vector<MPoint> points;
 	std::vector<Spring> springs;
-	double k;
+	double k, startArea;
 	Object(double mass, double k, const std::vector<Vector2d>& points_coords, sf::RenderTarget* rendertarget);
 	void draw(sf::RenderTarget& target) const;
 	void moveEul(double deltaTime);
+	void run();
+	double calcArea();
 
 	static std::vector<Object*> objects;
 	void solveCol();
-	void runSprings();
 
 	sf::RenderTarget* rendtarg;
 };
@@ -55,6 +57,11 @@ T cube(T x) {
 template<class T>
 T dotProduct(const sf::Vector2<T>& left, const sf::Vector2<T>& right) {
 	return left.x * right.x + left.y * right.y;
+}
+
+template<class T>
+T crossProduct(const sf::Vector2<T>& left, const sf::Vector2<T>& right) {
+	return left.x * right.y - left.y * right.x;
 }
 
 inline double len2(const Vector2d& vec) {

@@ -7,8 +7,8 @@ int main()
 	settings.antialiasingLevel = 8;
 	sf::RenderWindow window(sf::VideoMode::getFullscreenModes()[0], sf::String("Физика", std::locale("RUS")), sf::Style::Default, settings);
 
-	window.setFramerateLimit(70);
-	const int phys_per_frame = 10;
+	window.setFramerateLimit(90);
+	const int phys_per_frame = 4;
 
 	sf::Font font;
 	font.loadFromFile("C:\\Windows\\Fonts\\arial.ttf");
@@ -59,23 +59,27 @@ int main()
 					flag_static = false;
 				}
 			}
-			/*
+			
 			else if (event.type == sf::Event::MouseButtonPressed) {
+				if (mouse_pressed)
+					continue;
 				mouse_pressed = true;
 				points.emplace_back(event.mouseButton.x, event.mouseButton.y);
 			}
 			else if (event.type == sf::Event::MouseButtonReleased) {
+				if (!mouse_pressed)
+					continue;
 				mouse_pressed = false;
-				new Object(flag_static ? INF_MASS : 1., 5., points, &window);
+				new Object(flag_static ? INF_MASS : 1., 25., points, &window);
 				points.clear();
 			}
 			else if (mouse_pressed && event.type == sf::Event::MouseMoved) {
 				Vector2d mouse_move = Vector2d(event.mouseMove.x, event.mouseMove.y);
-				if (points.empty() || len2(mouse_move - points[points.size() - 1]) >= sqr(30.)) {
+				if (points.empty() || len2(mouse_move - points[points.size() - 1]) >= sqr(20.)) {
 					points.emplace_back(mouse_move);
 				}
 			}
-			*/
+			/*
 			else if (event.type == sf::Event::MouseButtonPressed) {
 				points.emplace_back(event.mouseButton.x, event.mouseButton.y);
 				if (event.mouseButton.button == sf::Mouse::Right) {
@@ -84,7 +88,7 @@ int main()
 				}
 			}
 			else if (event.type == sf::Event::MouseButtonReleased) {
-			}
+			}*/
 		}
 		window.clear();
 		for (int i = 0; i < phys_per_frame; ++i) {
@@ -92,7 +96,7 @@ int main()
 				i->solveCol();
 			}
 			for (auto i : Object::objects) {
-				i->runSprings();
+				i->run();
 			}
 			double elapsedTime = clock.getElapsedTime().asSeconds();
 			for (auto i : Object::objects) {

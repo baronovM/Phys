@@ -8,11 +8,11 @@ MPoint::MPoint(double mass, Vector2d position)
 
 void MPoint::moveEul(double deltaTime)
 {
-	force -= 0.005 * vel + 0.01 * vel * sqrt(len2(vel));
+	force -= air_resist_lin * vel + air_resist_sqr * vel * sqrt(len2(vel));
 	vel += force * inv_mass * deltaTime;
 	pos += vel * deltaTime;
 	force.x = 0;
-	force.y = 10. * mass;
+	force.y = g * mass;
 }
 
 
@@ -36,13 +36,14 @@ Object::Object(double mass, double k, const std::vector<Vector2d>& points_coords
 	int count = int(points_coords.size());
 	points.reserve(count);
 	springs.reserve(count);
-	double m1 = mass / count, k1 = 2. * k / (count * count);
+	double m1 = mass / count, k1 = k / count;//k1 = 2. * k / (count * count);
 	for (int i = 0; i < count; ++i) {
 		points.emplace_back(m1, points_coords[i]);
 	}
+	startArea = calcArea();
 	for (int i = 0; i < count; ++i) {
-		for (int j = i + 1; j < count; ++j)
-			springs.emplace_back(&points[i], &points[j], k1);
+		//for (int j = i + 1; j < count; ++j)
+		springs.emplace_back(&points[i], &points[(i + 1) % count], k1);
 	}
 
 	objects.push_back(this);
@@ -64,6 +65,38 @@ void Object::moveEul(double deltaTime)
 		i.moveEul(deltaTime);
 	}
 }
+
+void Object::run()
+{
+	for (int i = 0; i < springs.size(); ++i) {
+		springs[i].run();
+	}
+
+
+	double area = calcArea(), deltaP = p0 * (startArea / area - 1), force;
+	Vector2d edge, norm;
+	for (int i = 0; i < points.size(); ++i) {
+		edge = points[(i + 1) % points.size()].pos - points[i].pos;
+		norm.x = -edge.y, norm.y = edge.x;
+		norm /= sqrt(len2(norm));
+		force = deltaP * sqrt(len2(edge)) / 2;
+		points[i].force += force * norm;
+		points[(i + 1) % points.size()].force += force * norm;
+	}
+
+}
+
+double Object::calcArea()
+{
+	double s = 0;
+	for (int i = 0; i < points.size() - 1; ++i) {
+		s += crossProduct(points[i].pos, points[i + 1].pos);
+	}
+	s += crossProduct(points.back().pos, points.front().pos);
+	return abs(s / 2);
+}
+
+
 
 
 double dist_to_line2(Vector2d point, Vector2d n, double c) {
@@ -133,6 +166,9 @@ std::pair<Vector2d, Vector2d>* elrigid_centr_impact(const MPoint& a, const MPoin
 	deltaVptr->second = n * dv2;
 	return deltaVptr;
 }
+
+
+
 
 void Object::solveCol()
 {
@@ -216,12 +252,5 @@ void Object::solveCol()
 				delete dvptr;
 			}
 		}
-	}
-}
-
-void Object::runSprings()
-{
-	for (int i = 0; i < springs.size(); ++i) {
-		springs[i].run();
 	}
 }
