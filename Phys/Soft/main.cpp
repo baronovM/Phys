@@ -70,7 +70,7 @@ int main()
 				if (!mouse_pressed)
 					continue;
 				mouse_pressed = false;
-				new Object(flag_static ? INF_MASS : 1., 250., points, &window);
+				new Object(flag_static ? INF_MASS : 1., kstiffnes, points, &window);
 				points.clear();
 			}
 			else if (mouse_pressed && event.type == sf::Event::MouseMoved) {

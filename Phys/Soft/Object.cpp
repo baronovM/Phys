@@ -23,8 +23,8 @@ void Spring::run()
 {
 	Vector2d p1 = a->pos, p2 = b->pos;
 	double l = sqrt(len2(p2 - p1));
-	double f = (l - l0) * k;
-	Vector2d force = (p2 - p1) / l * f;
+	Vector2d dir = (p2 - p1) / l;
+	Vector2d force = dir * ((l - l0) * k + dotProduct(dir, b->vel - a->vel) * kdumping);
 	a->force += force;
 	b->force -= force;
 }
@@ -36,14 +36,14 @@ Object::Object(double mass, double k, const std::vector<Vector2d>& points_coords
 	int count = int(points_coords.size());
 	points.reserve(count);
 	springs.reserve(count);
-	double m1 = mass / count, k1 = 2. * k / (count * count);
+	double m1 = mass / count, k1 = k / count;//k1 = 2. * k / (count * count);
 	for (int i = 0; i < count; ++i) {
 		points.emplace_back(m1, points_coords[i]);
 	}
 	startArea = calcArea();
 	for (int i = 0; i < count; ++i) {
-		for (int j = i + 1; j < count; ++j)
-			springs.emplace_back(&points[i], &points[j], k1);
+		for (int j = i + 1; j < i + 4; ++j)
+			springs.emplace_back(&points[i], &points[j % count], k1);
 	}
 
 	objects.push_back(this);
@@ -73,7 +73,7 @@ void Object::run()
 	}
 
 
-	double area = calcArea(), deltaP = p0 * (startArea / area - 1), force;
+	double area = calcArea(), deltaP = p0 * (startArea / area - 0.6), force;
 	Vector2d edge, norm;
 	for (int i = 0; i < points.size(); ++i) {
 		edge = points[(i + 1) % points.size()].pos - points[i].pos;
