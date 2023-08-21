@@ -8,7 +8,7 @@ int main()
 	sf::RenderWindow window(sf::VideoMode::getFullscreenModes()[0], sf::String("Физика", std::locale("RUS")), sf::Style::Default, settings);
 
 	window.setFramerateLimit(90);
-	const int phys_per_frame = 4;
+	const int phys_per_frame = 6;
 
 	sf::Font font;
 	font.loadFromFile("C:\\Windows\\Fonts\\arial.ttf");
@@ -90,7 +90,8 @@ int main()
 			else if (event.type == sf::Event::MouseButtonReleased) {
 			}*/
 		}
-		window.clear();
+
+		double tick_duration = clock.restart().asSeconds() / phys_per_frame;
 		for (int i = 0; i < phys_per_frame; ++i) {
 			for (auto i : Object::objects) {
 				i->solveCol();
@@ -98,11 +99,12 @@ int main()
 			for (auto i : Object::objects) {
 				i->run();
 			}
-			double elapsedTime = clock.getElapsedTime().asSeconds();
 			for (auto i : Object::objects) {
-				i->moveEul(elapsedTime * timeSpeed);
+				i->moveEul(tick_duration * timeSpeed);
 			}
 		}
+
+		window.clear();
 		for (auto i : Object::objects) {
 			i->draw(window);
 		}
@@ -115,7 +117,6 @@ int main()
 
 
 		window.draw(text);
-		clock.restart();
 		window.display();
 	}
 
